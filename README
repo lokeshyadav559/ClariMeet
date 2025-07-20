@@ -1,0 +1,133 @@
+# Audio to Text to Summary Pipeline
+
+## Project Purpose
+This is a comprehensive audio-to-text-to-summary pipeline that processes audio files using Whisper for transcription 
+and LMStudio for intelligent summarization.
+
+## 🏗️ Architecture Overview
+
+### Core Components:
+
+**audio_pipeline_mvp.py (20KB, 534 lines)** - Consolidated MVP pipeline orchestrator
+- AudioProcessor: Handles audio preprocessing, normalization, chunking
+- WhisperTranscriber: Manages Whisper model loading and transcription
+- LMStudioClient: Integrates with LMStudio for OpenAI-compatible API calls
+- AudioPipelineMVP: Main orchestrator that combines all components with unified interface
+
+**setup.py (5.6KB, 166 lines)** - Environment setup and dependency management
+- FFmpeg installation across platforms
+- Python dependency management
+- Directory structure creation
+
+## 🔄 Processing Pipeline
+```
+Audio File → Preprocessing → Whisper Transcription → LMStudio Summarization → Output Files
+```
+
+## 🚀 Current Status
+The project is **production-ready** for batch audio processing with:
+- ✅ Complete audio to summary pipeline
+- ✅ Robust error handling
+- ✅ Comprehensive logging
+- ✅ Flexible configuration
+- ✅ Unified interface for single and batch processing
+
+## 📦 Usage Examples
+
+### Single File Processing:
+```bash
+python audio_pipeline_mvp.py input/episode01.mp3 \
+       --output-dir output/ \
+       --whisper-model large-v3 \
+       --language fr \
+       --lm-studio-url http://localhost:1234 \
+       --lm-studio-model nous-hermes-llama3-8b
+```
+
+### Batch Processing:
+```bash
+python audio_pipeline_mvp.py input/recordings/ \
+       --output-dir batch_output/ \
+       --recursive \
+       --max-workers 6 \
+       --language en
+```
+
+### Output Structure:
+```
+output/
+├── transcript.txt
+├── summary_comprehensive.txt
+├── summary_actionable.txt
+├── summary_bullet_points.txt
+├── results.json
+└── audio_pipeline.log
+```
+
+## 🎯 Key Features
+
+### Audio Processing:
+- ✅ Multi-format support (MP3, WAV, M4A, FLAC, etc.)
+- ✅ Automatic audio normalization and preprocessing
+- ✅ Intelligent chunking for long files
+- ✅ Language detection and specification
+
+### Transcription:
+- ✅ Whisper integration with configurable models
+- ✅ Timestamp preservation
+- ✅ Batch processing capabilities
+- ✅ Error handling and logging
+
+### Summarization:
+- ✅ LMStudio integration with OpenAI-compatible API
+- ✅ Multiple summary types for different use cases
+- ✅ Configurable model selection
+- ✅ Structured output formats
+
+### Batch Processing:
+- ✅ Parallel processing with configurable workers
+- ✅ Recursive file discovery
+- ✅ Progress tracking and reporting
+- ✅ Comprehensive error handling
+
+## 🔧 Configuration Options
+
+| Option | Description | Default |
+|--------|-------------|---------|
+| `--whisper-model` | Whisper model size | `large-v3` |
+| `--language` | Audio language | Auto-detect |
+| `--lm-studio-url` | LM Studio server URL | `http://localhost:1234` |
+| `--lm-studio-model` | Specific LM Studio model | Auto-detect |
+| `--recursive` | Search subdirectories | `False` |
+| `--max-workers` | Parallel workers for batch | `4` |
+
+## 🚨 Troubleshooting
+
+- **Memory errors** → Drop to medium or small Whisper models
+- **GPU unavailable** → Force CPU by setting `WHISPER_DEVICE=cpu` in .env
+- **Accented speech** → Pass `--language` explicitly
+- **Silence mis-triggers** → Tweak `no_speech_threshold` inside WhisperTranscriber
+- **Long silences** → Auto trimmed; disable by removing silence-threshold logic
+
+## 🔮 Future Enhancements
+
+- Add speaker diarisation using pyannote for multi participant calls
+- Switch to Audio-Llama using an all-in-one model
+- Pass WAV/MP3 directly to LM Studio chat endpoint
+- Replace LM Studio with any self-hosted OpenAI compatible gateway (Ollama, vLLM)
+
+## 📁 Project Structure
+
+```
+Final MVP/
+├── audio_pipeline_mvp.py (534 lines) - Consolidated pipeline
+├── requirements.txt (19 lines) - Essential dependencies
+├── setup.py (166 lines) - Environment setup
+├── README (93 lines) - Usage documentation
+├── input/ - Audio files directory
+├── output/ - Results directory
+├── logs/ - Log files
+└── temp/ - Temporary processing files
+```
+
+

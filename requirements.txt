@@ -1,0 +1,18 @@
+# Core audio processing
+openai-whisper>=20231117
+openai>=1.0.0
+
+# Audio processing
+pydub>=0.25.1
+librosa>=0.10.0
+soundfile>=0.12.1
+
+# LM Studio integration  
+requests>=2.31.0
+httpx>=0.24.0
+
+# Utilities
+numpy>=1.24.0
+python-dotenv>=1.0.0
+tqdm>=4.65.0
+click>=8.1.0

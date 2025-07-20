@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ClariMeet – Meeting Insights</title>
+    <style>
+        /* ————————————— EXISTING CLARIMEET CSS ————————————— */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #333;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 2rem;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            max-width: 800px;
+            width: 90%;
+            backdrop-filter: blur(10px);
+        }
+
+        h1 {
+            color: #8e24aa;
+            font-size: 2.5em;
+            margin-bottom: 1rem;
+            font-weight: 700;
+        }
+
+        p {
+            color: #666;
+            margin-bottom: 2rem;
+            font-size: 1.1em;
+            line-height: 1.6;
+        }
+
+        /* Tab Navigation */
+        .tab-container {
+            margin-bottom: 2rem;
+        }
+
+        .tab-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .tab-btn {
+            padding: 12px 24px;
+            background: #e0e0e0;
+            border: none;
+            border-radius: 25px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: #666;
+        }
+
+        .tab-btn.active {
+            background: linear-gradient(135deg, #8e24aa 0%, #7b1fa2 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(142, 36, 170, 0.3);
+        }
+
+        .tab-btn:hover:not(.active) {
+            background: #d0d0d0;
+        }
+
+        /* Tab Content */
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Meeting Form */
+        .input-group {
+            margin-bottom: 1.5rem;
+            text-align: left;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #8e24aa;
+            font-weight: 600;
+            font-size: 1.1em;
+        }
+
+        input[type="text"], input[type="url"] {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+            background: rgba(255, 255, 255, 0.8);
+        }
+
+        input[type="text"]:focus, input[type="url"]:focus {
+            outline: none;
+            border-color: #8e24aa;
+            box-shadow: 0 0 0 3px rgba(142, 36, 170, 0.1);
+        }
+
+        .join {
+            background: linear-gradient(135deg, #8e24aa 0%, #7b1fa2 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 1rem;
+            box-shadow: 0 4px 15px rgba(142, 36, 170, 0.3);
+        }
+
+        .join:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(142, 36, 170, 0.4);
+        }
+
+        .join:active {
+            transform: translateY(0);
+        }
+
+        /* ————————————— NEW AUDIO PROCESSING CSS ————————————— */
+        /* Upload Area */
+        .upload-area {
+            padding: 40px 20px;
+            border: 3px dashed #8e24aa;
+            border-radius: 15px;
+            text-align: center;
+            margin: 20px 0;
+            transition: all 0.3s ease;
+            background: rgba(142, 36, 170, 0.05);
+        }
+
+        .upload-area:hover {
+            background: rgba(142, 36, 170, 0.1);
+            border-color: #7b1fa2;
+        }
+
+        .upload-area input[type="file"] {
+            margin: 15px 0;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background: white;
+            width: 100%;
+            max-width: 400px;
+        }
+
+        /* Progress Bar */
+        .progress-container {
+            margin: 30px 0;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 25px;
+            background: #e0e0e0;
+            border-radius: 15px;
+            overflow: hidden;
+            margin: 15px 0;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(135deg, #8e24aa 0%, #7b1fa2 100%);
+            width: 0%;
+            transition: width 0.3s ease;
+            border-radius: 15px;
+            box-shadow: 0 2px 8px rgba(142, 36, 170, 0.3);
+        }
+
+        #progressText {
+            color: #8e24aa;
+            font-weight: 600;
+            margin-top: 10px;
+        }
+
+        /* Result Boxes */
+        .result-box {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            margin: 20px 0;
+            text-align: left;
+            border: 1px solid #e0e0e0;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+
+        .result-box h3 {
+            color: #8e24aa;
+            margin-bottom: 15px;
+            font-size: 1.4em;
+        }
+
+        .result-box h4 {
+            color: #7b1fa2;
+            margin-bottom: 10px;
+        }
+
+        .summary-type {
+            border-left: 4px solid #8e24aa;
+            padding-left: 20px;
+            margin: 20px 0;
+            background: rgba(142, 36, 170, 0.02);
+            padding: 15px 20px;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .summary-type a {
+            display: inline-block;
+            background: #8e24aa;
+            color: white;
+            padding: 8px 16px;
+            text-decoration: none;
+            border-radius: 20px;
+            margin-top: 10px;
+            font-size: 0.9em;
+            transition: background 0.3s ease;
+        }
+
+        .summary-type a:hover {
+            background: #7b1fa2;
+        }
+
+        /* Utility Classes */
+        .hidden {
+            display: none !important;
+        }
+
+        /* Summary Container (for meeting results) */
+        .summary-container {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 2rem;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            max-width: 800px;
+            width: 90%;
+            margin: 2rem auto;
+            backdrop-filter: blur(10px);
+        }
+
+        .summary-container h1 {
+            color: #8e24aa;
+            margin-bottom: 1rem;
+        }
+
+        .summary-container h2 {
+            color: #7b1fa2;
+            margin: 1.5rem 0 1rem;
+        }
+
+        .action-buttons {
+            margin-top: 2rem;
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        /* Process Another Button */
+        .process-another {
+            background: linear-gradient(135deg, #4caf50 0%, #45a049 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 25px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+        }
+
+        .process-another:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 600px) {
+            .container {
+                padding: 1.5rem;
+                margin: 1rem;
+            }
+
+            h1 {
+                font-size: 2em;
+            }
+
+            .tab-buttons {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+
+            .upload-area {
+                padding: 20px 10px;
+            }
+        }
+        .server-status {
+            margin-bottom: 1rem;
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-weight: 600;
+            display: inline-block;
+        }
+        .server-status.ready {
+            background: #e8f5e9;
+            color: #388e3c;
+            border: 1px solid #388e3c;
+        }
+        .server-status.loading {
+            background: #fffde7;
+            color: #fbc02d;
+            border: 1px solid #fbc02d;
+        }
+        .server-status.error {
+            background: #ffebee;
+            color: #d32f2f;
+            border: 1px solid #d32f2f;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <!-- Server Status Indicator -->
+        <div id="serverStatus" class="server-status loading">Checking server status...</div>
+        <!-- Tab Navigation -->
+        <div class="tab-container">
+            <div class="tab-buttons">
+                <button class="tab-btn active" onclick="switchTab('meeting')">Join Meeting</button>
+                <button class="tab-btn" onclick="switchTab('audio')">Process Audio</button>
+            </div>
+
+            <!-- ————————————— MEETING TAB ————————————— -->
+            <div id="meetingTab" class="tab-content active">
+                <div id="joinPage">
+                    <h1>ClariMeet</h1>
+                    <p>Transform your meetings into actionable insights with AI-powered summarization</p>
+                    
+                    <form id="meetingForm" onsubmit="joinMeeting(event)">
+                        <div class="input-group">
+                            <label for="meetingLink">Meeting Link</label>
+                            <input type="url" id="meetingLink" name="meetingLink" 
+                                   placeholder="Paste your meeting link here..." required>
+                        </div>
+                        
+                        <div class="input-group">
+                            <label for="participantName">Your Name</label>
+                            <input type="text" id="participantName" name="participantName" 
+                                   placeholder="Enter your name..." required>
+                        </div>
+                        
+                        <button type="submit" class="join">Join & Start Recording</button>
+                    </form>
+                </div>
+
+                <!-- Meeting Summary Display -->
+                <div id="summaryPage" class="hidden">
+                    <h1>Meeting Summary</h1>
+                    <div id="summaryContent">
+                        <!-- Meeting summary will be populated here -->
+                    </div>
+                    <div class="action-buttons">
+                        <button class="join" onclick="startNewMeeting()">Join New Meeting</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ————————————— AUDIO PROCESSING TAB ————————————— -->
+            <div id="audioTab" class="tab-content">
+                <div id="uploadPage">
+                    <h1>Upload Audio for Processing</h1>
+                    <p>Upload your audio file to get transcription and AI-powered summaries</p>
+
+                    <div class="upload-area">
+                        <input type="file" id="audioFile" 
+                               accept=".mp3,.wav,.m4a,.flac,.ogg,.wma,.aac,.mp4,.webm,.mov" />
+                        <button class="join" onclick="uploadAudio()">Process Audio</button>
+                    </div>
+
+                    <!-- Progress Display -->
+                    <div id="progressContainer" class="hidden progress-container">
+                        <div class="progress-bar">
+                            <div id="progressFill" class="progress-fill"></div>
+                        </div>
+                        <p id="progressText">Processing...</p>
+                    </div>
+
+                    <!-- Results Display -->
+                    <div id="resultsContainer" class="hidden">
+                        <h2>Processing Results</h2>
+                        <div id="transcriptResult" class="result-box"></div>
+                        <div id="summaryResult" class="result-box"></div>
+                        <div class="action-buttons">
+                            <button class="process-another" onclick="resetAudioProcessing()">Process Another File</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ————————————— TAB SWITCHING ————————————— 
+        function switchTab(tabName) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Remove active class from all buttons
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Show selected tab
+            if (tabName === 'meeting') {
+                document.getElementById('meetingTab').classList.add('active');
+                document.querySelector('.tab-btn').classList.add('active');
+            } else if (tabName === 'audio') {
+                document.getElementById('audioTab').classList.add('active');
+                document.querySelectorAll('.tab-btn')[1].classList.add('active');
+            }
+        }
+
+        // ————————————— MEETING FUNCTIONALITY ————————————— 
+        function joinMeeting(event) {
+            event.preventDefault();
+            
+            const meetingLink = document.getElementById('meetingLink').value;
+            const participantName = document.getElementById('participantName').value;
+            
+            // Hide join form and show processing
+            document.getElementById('joinPage').classList.add('hidden');
+            
+            // Simulate meeting processing (replace with actual API call)
+            setTimeout(() => {
+                showMeetingSummary(meetingLink, participantName);
+            }, 2000);
+        }
+
+        function showMeetingSummary(link, name) {
+            // Show summary page
+            document.getElementById('summaryPage').classList.remove('hidden');
+            
+            // Populate with sample summary (replace with actual data)
+            document.getElementById('summaryContent').innerHTML = `
+                <h2>Meeting Overview</h2>
+                <p><strong>Participant:</strong> ${name}</p>
+                <p><strong>Meeting Link:</strong> ${link}</p>
+                <p><strong>Duration:</strong> 45 minutes</p>
+                
+                <h2>Key Discussion Points</h2>
+                <ul>
+                    <li>Project timeline and milestones</li>
+                    <li>Budget allocation and resources</li>
+                    <li>Team responsibilities and assignments</li>
+                </ul>
+                
+                <h2>Action Items</h2>
+                <ul>
+                    <li>Finalize project requirements by next Friday</li>
+                    <li>Schedule follow-up meeting for next week</li>
+                    <li>Share updated documentation with the team</li>
+                </ul>
+            `;
+        }
+
+        function startNewMeeting() {
+            // Reset to join page
+            document.getElementById('summaryPage').classList.add('hidden');
+            document.getElementById('joinPage').classList.remove('hidden');
+            document.getElementById('meetingForm').reset();
+        }
+
+        // ————————————— SERVER HEALTH CHECK —————————————
+        let serverReady = false;
+        async function checkServerHealth() {
+            const statusDiv = document.getElementById('serverStatus');
+            try {
+                const response = await fetch('/health', { cache: 'no-store' });
+                if (!response.ok) throw new Error('Server not ready');
+                const data = await response.json();
+                if (data.status === 'healthy') {
+                    statusDiv.textContent = 'Server Ready';
+                    statusDiv.className = 'server-status ready';
+                    serverReady = true;
+                    document.querySelector('.join[onclick="uploadAudio()"], .join[onclick^=uploadAudio]').disabled = false;
+                } else {
+                    statusDiv.textContent = 'Server is loading...';
+                    statusDiv.className = 'server-status loading';
+                    serverReady = false;
+                    document.querySelector('.join[onclick="uploadAudio()"], .join[onclick^=uploadAudio]').disabled = true;
+                }
+            } catch (err) {
+                statusDiv.textContent = 'Server not reachable. Please start the backend.';
+                statusDiv.className = 'server-status error';
+                serverReady = false;
+                document.querySelector('.join[onclick="uploadAudio()"], .join[onclick^=uploadAudio]').disabled = true;
+            }
+        }
+
+        // Poll server health every 5 seconds
+        setInterval(checkServerHealth, 5000);
+
+        // ————————————— AUDIO PROCESSING FUNCTIONALITY (MODIFIED) ————————————— 
+        let websocket = null;
+        let currentTaskId = null;
+
+        // WebSocket Connection
+        function connectWebSocket() {
+            const clientId = 'client-' + Math.random().toString(36).substr(2, 9);
+            websocket = new WebSocket(`ws://localhost:8000/ws/${clientId}`);
+            
+            websocket.onopen = function(event) {
+                console.log('WebSocket connected');
+            };
+            
+            websocket.onmessage = function(event) {
+                const message = JSON.parse(event.data);
+                handleWebSocketMessage(message);
+            };
+            
+            websocket.onerror = function(error) {
+                console.error('WebSocket error:', error);
+            };
+
+            websocket.onclose = function() {
+                console.log('WebSocket disconnected');
+            };
+        }
+
+        // Handle WebSocket Messages
+        function handleWebSocketMessage(message) {
+            if (message.type === 'status_update' && message.task_id === currentTaskId) {
+                updateProgress(message.data);
+            }
+        }
+
+        async function uploadAudio() {
+            if (!serverReady) {
+                alert('Server is not ready. Please wait until the server is ready.');
+                return;
+            }
+            const fileInput = document.getElementById('audioFile');
+            const file = fileInput.files[0];
+            if (!file) {
+                alert('Please select an audio file');
+                return;
+            }
+            // Show progress
+            document.getElementById('progressContainer').classList.remove('hidden');
+            document.getElementById('resultsContainer').classList.add('hidden');
+            // Connect WebSocket
+            connectWebSocket();
+            // Upload file
+            const formData = new FormData();
+            formData.append('file', file);
+            try {
+                const response = await fetch('/upload-audio', {
+                    method: 'POST',
+                    body: formData
+                });
+                if (!response.ok) {
+                    let msg = 'Upload failed.';
+                    if (response.status === 503) {
+                        msg = 'Server is still loading the model. Please wait and try again.';
+                    } else if (response.status === 404) {
+                        msg = 'Upload endpoint not found. Please check server.';
+                    }
+                    throw new Error(msg);
+                }
+                const result = await response.json();
+                currentTaskId = result.task_id;
+                // Subscribe to task updates
+                if (websocket && websocket.readyState === WebSocket.OPEN) {
+                    websocket.send(JSON.stringify({
+                        type: 'subscribe',
+                        task_id: currentTaskId
+                    }));
+                }
+            } catch (error) {
+                console.error('Upload failed:', error);
+                alert(error.message || 'Upload failed. Please check if the server is running and try again.');
+                document.getElementById('progressContainer').classList.add('hidden');
+            }
+        }
+
+        // Update Progress Display
+        function updateProgress(taskData) {
+            const progressFill = document.getElementById('progressFill');
+            const progressText = document.getElementById('progressText');
+            
+            progressFill.style.width = taskData.progress + '%';
+            progressText.textContent = `${taskData.current_step}: ${taskData.message} (${Math.round(taskData.progress)}%)`;
+            
+            // Handle completion
+            if (taskData.status === 'completed') {
+                displayResults(taskData.result);
+            } else if (taskData.status === 'error') {
+                progressText.textContent = `Error: ${taskData.error}`;
+                progressFill.style.backgroundColor = '#e53e3e';
+            }
+        }
+
+        // Display Processing Results
+        function displayResults(result) {
+            document.getElementById('progressContainer').classList.add('hidden');
+            document.getElementById('resultsContainer').classList.remove('hidden');
+            
+            // Display transcript
+            document.getElementById('transcriptResult').innerHTML = `
+                <h3>Transcript</h3>
+                <p>${result.transcription.full_text}</p>
+                <small>Word count: ${result.transcription.word_count}</small>
+            `;
+            
+            // Display summaries
+            let summaryHtml = '<h3>Summaries</h3>';
+            for (const [type, content] of Object.entries(result.summaries)) {
+                const typeTitle = type.charAt(0).toUpperCase() + type.slice(1).replace('_', ' ');
+                summaryHtml += `
+                    <div class="summary-type">
+                        <h4>${typeTitle}</h4>
+                        <p>${content}</p>
+                        <a href="/download/${result.task_id}/${type}" download>Download ${typeTitle}</a>
+                    </div>
+                `;
+            }
+            document.getElementById('summaryResult').innerHTML = summaryHtml;
+        }
+
+        // Reset Audio Processing
+        function resetAudioProcessing() {
+            // Reset form and hide results
+            document.getElementById('audioFile').value = '';
+            document.getElementById('progressContainer').classList.add('hidden');
+            document.getElementById('resultsContainer').classList.add('hidden');
+            
+            // Close WebSocket if open
+            if (websocket) {
+                websocket.close();
+                websocket = null;
+            }
+            
+            currentTaskId = null;
+            
+            // Reset progress bar
+            document.getElementById('progressFill').style.width = '0%';
+            document.getElementById('progressText').textContent = 'Processing...';
+        }
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            checkServerHealth();
+            // Set default tab
+            switchTab('meeting');
+        });
+    </script>
+</body>
+</html>
